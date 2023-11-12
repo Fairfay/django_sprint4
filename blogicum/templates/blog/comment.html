@@ -24,7 +24,9 @@
               action="{% url 'blog:edit_comment' comment.post_id comment.id %}"
             {% endif %}>
             {% csrf_token %}
-
+            {% if not '/delete_comment/' in request.path %}
+            {% bootstrap_form form %}
+            {% else %}
               <p>{{ comment.text }}</p>
             {% endif %}
             {% bootstrap_button button_type="submit" content="Отправить" %}
