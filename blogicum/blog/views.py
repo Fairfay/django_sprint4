@@ -20,6 +20,7 @@ User = get_user_model()
 
 NUM_POSTS_TO_DISPLAY = 10
 
+
 @login_required
 def simple_view(request):
     return HttpResponse('Страница для залогиненных пользователей!')
@@ -99,7 +100,8 @@ def category_posts(request, category_slug):
         page_obj = paginator.page(1)
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
-    return render(request, 'blog/category.html', {'category': category, 'page_obj': page_obj})
+    return render(request, 'blog/category.html', {'category': category,
+                                                  'page_obj': page_obj})
 
 
 @login_required
@@ -122,7 +124,8 @@ def profile(request, username):
     posts_query = profile.posts.all()
     if request.user != profile:
         posts_query = posts_query.filter(is_published=True)
-    posts_query = posts_query.order_by('-created_at').annotate(comment_count=Count("comment"))
+    posts_query = posts_query.order_by('-created_at').annotate(
+        comment_count=Count("comment"))
     paginator = Paginator(posts_query, NUM_POSTS_TO_DISPLAY)
     page_obj = paginator.get_page(request.GET.get('page'))
     template = 'blog/profile.html'
