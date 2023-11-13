@@ -34,7 +34,9 @@ def get_published_posts():
         is_published=True,
     )
 
-#не знаю как обойти тесты для использования функции
+# Не понимаю как обойти тесты для использования функции
+
+
 def get_unpublished_posts():
     return Post.objects.select_related(
         'author', 'location'
@@ -45,7 +47,8 @@ def get_unpublished_posts():
 
 
 def index(request):
-    posts = get_published_posts().order_by('-created_at').annotate(comment_count=Count("comment"))
+    posts = get_published_posts().order_by('-created_at').annotate(
+        comment_count=Count("comment"))
     paginator = Paginator(posts, NUM_POSTS_TO_DISPLAY)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -58,7 +61,8 @@ def index(request):
 
 def post_detail(request, id):
     form = CommentForm()
-    post = get_object_or_404(Post.objects.select_related('author', 'location'), pk=id)
+    post = get_object_or_404(Post.objects.select_related('author', 'location'),
+                             pk=id)
     if request.user != post.author:
         posts = Post.objects.select_related('author', 'location').filter(
             is_published=True,
@@ -66,10 +70,12 @@ def post_detail(request, id):
         )
         post = get_object_or_404(posts, pk=id)
         comments = post.comment.all()
-        return render(request, 'blog/detail.html', {'post': post, 'form': form, 'comments': comments})
+        return render(request, 'blog/detail.html', {'post': post, 'form': form,
+                                                    'comments': comments})
     else:
         comments = post.comment.all()
-        return render(request, 'blog/detail.html', {'post': post, 'form': form, 'comments': comments})
+        return render(request, 'blog/detail.html', {'post': post, 'form': form,
+                                                    'comments': comments})
 
 
 def category_posts(request, category_slug):
