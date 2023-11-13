@@ -190,7 +190,7 @@ def add_comment(request, post_id):
         comment.author = request.user
         comment.post = post
         comment.save()
-    return redirect('blog:post_detail', id=post_id) 
+    return redirect('blog:post_detail', id=post_id)
 
 
 @login_required
