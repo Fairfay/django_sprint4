@@ -6,12 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
 from django.db.models import Count
+from blog.models import Post, Category, Comment
 
 from django.http import HttpResponse
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-from blog.models import Post, Category, Comment
 
 from .forms import PostForm, EditForm, CommentForm
 
@@ -52,11 +51,7 @@ def index(request):
         comment_count=Count("comment"))
     paginator = Paginator(posts, NUM_POSTS_TO_DISPLAY)
     page_obj = paginator.get_page(request.GET.get('page'))
-    template = 'blog/index.html'
-    context = {
-        'page_obj': page_obj,
-    }
-    return render(request, template, context)
+    return render(request, 'blog/index.html', {'page_obj': page_obj})
 
 
 def post_detail(request, id):
@@ -113,9 +108,7 @@ def create_post(request):
         create_post.author = request.user
         create_post.save()
         return redirect('blog:profile', create_post.author)
-    template = 'blog/create.html'
-    context = {'form': form}
-    return render(request, template, context)
+    return render(request, 'blog/create.html', {'form': form})
 
 
 def profile(request, username):
@@ -127,12 +120,10 @@ def profile(request, username):
         comment_count=Count("comment")).order_by('-pub_date')
     paginator = Paginator(posts_query, NUM_POSTS_TO_DISPLAY)
     page_obj = paginator.get_page(request.GET.get('page'))
-    template = 'blog/profile.html'
-    context = {
+    return render(request, 'blog/profile.html', {
         'page_obj': page_obj,
         'profile': profile,
-    }
-    return render(request, template, context)
+    })
 
 
 @login_required
@@ -145,9 +136,8 @@ def edit_profile(request, username):
             return redirect('blog:profile', username)
     else:
         form = EditForm(instance=profile)
-    template = 'blog/user.html'
-    context = {'form': form, 'profile': profile, 'is_edit': True}
-    return render(request, template, context)
+    return render(request, 'blog/user.html',
+                  {'form': form, 'profile': profile, 'is_edit': True})
 
 
 @login_required
@@ -162,9 +152,8 @@ def edit_post(request, post_id):
     if form.is_valid():
         form.save()
         return redirect('blog:post_detail', post_id)
-    template = 'blog/create.html'
-    context = {'form': form, 'post': post, 'is_edit': True}
-    return render(request, template, context)
+    return render(request, 'blog/create.html',
+                  {'form': form, 'post': post, 'is_edit': True})
 
 
 @login_required
@@ -175,9 +164,7 @@ def delete_post(request, post_id):
     if request.method == 'POST':
         post.delete()
         return redirect('blog:index')
-    template = 'blog/create.html'
-    context = {'post': post}
-    return render(request, template, context)
+    return render(request, 'blog/create.html', {'post': post})
 
 
 @login_required
@@ -204,9 +191,8 @@ def edit_comment(request, post_id, comment_id):
     if form.is_valid():
         form.save()
         return redirect('blog:post_detail', post_id)
-    template = 'blog/comment.html'
-    context = {'form': form, 'comment': comment, 'is_edit': True}
-    return render(request, template, context)
+    return render(request, 'blog/comment.html',
+                  {'form': form, 'comment': comment, 'is_edit': True})
 
 
 @login_required
@@ -217,6 +203,4 @@ def delete_comment(request, post_id, comment_id):
     if request.method == 'POST':
         comment.delete()
         return redirect('blog:post_detail', post_id)
-    template = 'blog/comment.html'
-    context = {'comment': comment}
-    return render(request, template, context)
+    return render(request, 'blog/comment.html', {'comment': comment})
