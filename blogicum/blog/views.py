@@ -34,8 +34,6 @@ def get_published_posts():
         is_published=True,
     )
 
-# Не понимаю как обойти тесты для использования функции
-
 
 def get_unpublished_posts():
     return Post.objects.select_related(
