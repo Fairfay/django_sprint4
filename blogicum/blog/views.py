@@ -48,11 +48,10 @@ def get_unpublished_posts():
 
 
 def index(request):
-    posts = get_published_posts().order_by('-created_at').annotate(
+    posts = get_published_posts().order_by('-pub_date').annotate(
         comment_count=Count("comment"))
     paginator = Paginator(posts, NUM_POSTS_TO_DISPLAY)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(request.GET.get('page'))
     template = 'blog/index.html'
     context = {
         'page_obj': page_obj,
@@ -91,7 +90,7 @@ def category_posts(request, category_slug):
     ).filter(
         is_published=True,
         pub_date__lte=timezone.now()
-    )
+    ).order_by('-pub_date')
     paginator = Paginator(posts, NUM_POSTS_TO_DISPLAY)
     page = request.GET.get('page')
     try:
@@ -124,8 +123,8 @@ def profile(request, username):
     posts_query = profile.posts.all()
     if request.user != profile:
         posts_query = posts_query.filter(is_published=True)
-    posts_query = posts_query.order_by('-created_at').annotate(
-        comment_count=Count("comment"))
+    posts_query = posts_query.annotate(
+        comment_count=Count("comment")).order_by('-pub_date')
     paginator = Paginator(posts_query, NUM_POSTS_TO_DISPLAY)
     page_obj = paginator.get_page(request.GET.get('page'))
     template = 'blog/profile.html'
