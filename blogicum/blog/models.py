@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 
 User = get_user_model()
@@ -21,7 +21,7 @@ class PublishedModel(models.Model):
         verbose_name = 'Объект с публикацией'
 
     def __str__(self):
-        return f'{self.__class__.__name__} #{self.pk}'
+        return self.title
 
 
 class Category(PublishedModel):
@@ -57,7 +57,7 @@ class Location(PublishedModel):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name
+        return self.name[:30]
 
 
 class Post(PublishedModel):
@@ -79,7 +79,6 @@ class Post(PublishedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
-        related_name='posts'
     )
     location = models.ForeignKey(
         Location,
@@ -87,14 +86,12 @@ class Post(PublishedModel):
         null=True,
         on_delete=models.SET_NULL,
         verbose_name='Местоположение',
-        related_name='posts',
     )
     category = models.ForeignKey(
         Category,
         null=True,
         on_delete=models.SET_NULL,
         verbose_name='Категория',
-        related_name='posts'
     )
     image = models.ImageField(
         'Фото', blank=True
@@ -107,7 +104,7 @@ class Post(PublishedModel):
         default_related_name = 'posts'
 
     def __str__(self):
-        return self.title
+        return self.title[:20]
 
 
 class Comment(models.Model):
@@ -122,6 +119,8 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('created_at',)
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return f'Комментарий от {self.author} к посту "{self.post}"'
+        return f'Комментарий от {self.author} к посту "{self.post}"'[:30]

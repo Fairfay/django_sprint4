@@ -1,10 +1,10 @@
-from django.utils import timezone
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.shortcuts import render, get_object_or_404, redirect
 
-from .forms import PostForm, EditForm, CommentForm
-from blog.models import Post, Category, Comment
+from blog.forms import CommentForm, EditForm, PostForm
+from blog.models import Category, Comment, Post
 from blog.utils import get_published_posts, get_paginated_posts
 
 
@@ -41,12 +41,12 @@ def category_posts(request, category_slug):
         slug=category_slug,
         is_published=True
     )
-    posts = category.posts.all().select_related(
+    posts = get_published_posts().filter(
+        category=category,
+    ).select_related(
         'location',
-        'author'
-    ).filter(
-        is_published=True,
-        pub_date__lte=timezone.now()
+        'author',
+        'category'
     )
     page_obj = get_paginated_posts(request, posts)
     return render(request, 'blog/category.html', {'category': category,
@@ -80,8 +80,6 @@ def profile(request, username):
 
 @login_required
 def edit_profile(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
     profile = get_object_or_404(User, username=request.user.username)
     form = EditForm(request.POST or None, instance=profile)
     if form.is_valid():
@@ -104,7 +102,7 @@ def edit_post(request, post_id):
         form.save()
         return redirect('blog:post_detail', post_id)
     return render(request, 'blog/create.html',
-                  {'form': form, 'post': post, 'is_edit': True})
+                  {'form': form, 'post': post})
 
 
 @login_required
